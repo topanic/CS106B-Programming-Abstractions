@@ -11,3 +11,4 @@
 void soundexSearch(std::string filepath);
 std::string soundex(std::string s);
 std::string lettersOnly(std::string s);
+std::string encode(char code);

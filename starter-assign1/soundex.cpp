@@ -7,6 +7,7 @@
 #include <cctype>
 #include <fstream>
 #include <string>
+#include <algorithm>
 #include "console.h"
 #include "strlib.h"
 #include "filelib.h"
@@ -27,8 +28,9 @@ using namespace std;
  * replace it with a description of the bug you fixed.
  */
 string lettersOnly(string s) {
-    string result = charToString(s[0]);
-    for (int i = 1; i < s.length(); i++) {
+    string result = "";
+    // string result = charToString(s[0]);
+    for (int i = 0; i < s.length(); i++) {
         if (isalpha(s[i])) {
             result += s[i];
         }
@@ -36,13 +38,57 @@ string lettersOnly(string s) {
     return result;
 }
 
+string encode(char code) {
+    code = toupper(code);
+    if (code == 'A' || code == 'E' || code == 'I' || code == 'O' || code == 'U' || code == 'H' || code == 'W' || code == 'Y') {
+        return "0";
+    } else if (code == 'B' || code == 'F' || code == 'P' || code == 'V') {
+        return "1";
+    } else if (code == 'C' || code == 'G' || code == 'J' || code == 'K' || code == 'Q' || code == 'X' || code == 'S' || code == 'Z') {
+        return "2";
+    } else if (code == 'D' || code == 'T') {
+        return "3";
+    } else if (code == 'L') {
+        return "4";
+    } else if (code == 'M' || code == 'N') {
+        return "5";
+    } else if (code == 'R') {
+        return "6";
+    } else {
+        return "";
+    }
+}
+
+
 
 /* TODO: Replace this comment with a descriptive function
  * header comment.
  */
 string soundex(string s) {
     /* TODO: Fill in this function. */
-    return "";
+
+    // 1. Extract only the letters from the surname, discarding all non-letters (no dashes, spaces, apostrophes, …).
+    s = lettersOnly(s);
+    // 2. Encode each letter as a digit using the table below.
+    string result = "";
+    for (int i = 0; i < s.length(); i++) {
+        result += encode(s[i]);
+    }
+    // 3. Coalesce adjacent duplicate digits from the code (e.g. 222025 becomes 2025).
+    result.erase(unique(result.begin(), result.end()), result.end());
+
+    // 4. Replace the first digit of the code with the first letter of the original name, converting to uppercase.
+    char firstName = s[0];
+    firstName = toupper(firstName);
+    result[0] = firstName;
+
+    // 5. Discard any zeros from the code.
+    result.erase(remove(result.begin(), result.end(), '0'), result.end());
+
+    // 6. Make the code exactly length 4 by padding with zeros or truncating the excess.
+    result.resize(4, '0');
+
+    return result;
 }
 
 
@@ -70,6 +116,20 @@ void soundexSearch(string filepath) {
 /* * * * * * Test Cases * * * * * */
 
 // TODO: add your STUDENT_TEST test cases here!
+STUDENT_TEST("lettersOnly function") {
+    string s = "O'Hara";
+    string result = lettersOnly(s);
+    EXPECT_EQUAL(result, "OHara");
+    s = "Planet9";
+    result = lettersOnly(s);
+    EXPECT_EQUAL(result, "Planet");
+    s = "tl dr";
+    result = lettersOnly(s);
+    EXPECT_EQUAL(result, "tldr");
+    s = "'hello";
+    result = lettersOnly(s);
+    EXPECT_EQUAL(result, "hello");
+}
 
 
 /* Please not add/modify/remove the PROVIDED_TEST entries below.
